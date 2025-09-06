@@ -7,6 +7,8 @@ from botocore.config import Config as BotoConfig
 from langchain_huggingface import HuggingFaceEmbeddings
 from chromadb.config import Settings as ChromaSettings
 from langchain_chroma import Chroma
+from langchain_ollama import ChatOllama
+
 
 class InfraContainer(containers.DeclarativeContainer):
     config = providers.Object(settings)
@@ -33,16 +35,24 @@ class InfraContainer(containers.DeclarativeContainer):
     )
 
     # Chroma
-    chroma_settings = providers.Object(ChromaSettings(
-        anonymized_telemetry=False,
-        allow_reset=False,
-    ))
+    chroma_settings = providers.Object(
+        ChromaSettings(
+            anonymized_telemetry=False,
+            allow_reset=False,
+        )
+    )
 
     chroma = providers.Singleton(
         Chroma,
         collection_name="cosine_collection",
         embedding_function=embeddings,
-        persist_directory=config.provided.CHROMA_DIR,       
+        persist_directory=config.provided.CHROMA_DIR,
         client_settings=chroma_settings,
         collection_metadata={"hnsw:space": "cosine"},
+    )
+
+    llm = providers.Singleton(
+        ChatOllama,
+        model="exaone3.5",
+        temperature=0.3,
     )
