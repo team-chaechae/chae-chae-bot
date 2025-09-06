@@ -40,3 +40,6 @@ build/
 
 # Windows specific files
 Thumbs.db
+
+# Chroma DIR
+chroma/
