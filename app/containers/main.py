@@ -8,6 +8,7 @@ class MainContainer(DeclarativeContainer):
     wiring_config = WiringConfiguration(
         packages=[
             "app.core.fastapi",
+            "app.api.v1",
         ]
     )
 
