@@ -5,7 +5,11 @@ from app.containers.domain import DomainsContainer
 
 
 class MainContainer(DeclarativeContainer):
-    wiring_config = WiringConfiguration(packages=[])
+    wiring_config = WiringConfiguration(
+        packages=[
+            "app.core.fastapi",
+        ]
+    )
 
     infra = providers.Container(InfraContainer)
     domains = providers.Container(DomainsContainer, infra=infra)
