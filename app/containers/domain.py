@@ -18,4 +18,5 @@ class DomainsContainer(containers.DeclarativeContainer):
         DatasetService,
         s3=infra.s3,
         crud=dataset_crud,
+        vectorstore=infra.chroma,
     )
