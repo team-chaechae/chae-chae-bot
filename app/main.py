@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request, status
 from sqlalchemy import text
 
-from app.api.v1 import dataset_router
+from app.api.v1 import dataset_router, rag_router
 from app.containers.main import MainContainer
 from app.core.fastapi.middleware import AsyncSessionMiddleware
 from app.database.session import async_engine
@@ -27,6 +27,8 @@ def create_app() -> FastAPI:
 
     app.add_middleware(AsyncSessionMiddleware)          
     app.include_router(dataset_router.router)
+    app.include_router(rag_router.router)              
+
     
     @app.get("/health", status_code=status.HTTP_200_OK, summary="Health check")
     async def health_check(request: Request):

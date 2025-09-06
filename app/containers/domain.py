@@ -1,6 +1,7 @@
 from dependency_injector import containers, providers
 
 from app.crud.dataset_crud import DatasetCRUD
+from app.rag.chain import build_rag_chain
 from app.service.dataset_service import DatasetService
 
 
@@ -19,4 +20,11 @@ class DomainsContainer(containers.DeclarativeContainer):
         s3=infra.s3,
         crud=dataset_crud,
         vectorstore=infra.chroma,
+    )
+
+    # RAG Chain
+    rag_chain = providers.Singleton(
+        build_rag_chain,
+        vectorstore=infra.chroma,
+        llm=infra.llm,
     )
