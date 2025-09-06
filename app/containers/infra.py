@@ -4,6 +4,9 @@ from app.database.session import AsyncScopedSession
 import boto3
 from botocore.config import Config as BotoConfig
 
+from langchain_huggingface import HuggingFaceEmbeddings
+from chromadb.config import Settings as ChromaSettings
+from langchain_chroma import Chroma
 
 class InfraContainer(containers.DeclarativeContainer):
     config = providers.Object(settings)
@@ -20,4 +23,26 @@ class InfraContainer(containers.DeclarativeContainer):
         aws_secret_access_key=config.provided.MINIO_SECRET_KEY,
         config=BotoConfig(s3={"addressing_style": "path"}),
         region_name=config.provided.REGION,
+    )
+
+    # Embeddings
+    embeddings = providers.Singleton(
+        HuggingFaceEmbeddings,
+        model_name="BAAI/bge-m3",
+        encode_kwargs={"normalize_embeddings": True},
+    )
+
+    # Chroma
+    chroma_settings = providers.Object(ChromaSettings(
+        anonymized_telemetry=False,
+        allow_reset=False,
+    ))
+
+    chroma = providers.Singleton(
+        Chroma,
+        collection_name="cosine_collection",
+        embedding_function=embeddings,
+        persist_directory=config.provided.CHROMA_DIR,       
+        client_settings=chroma_settings,
+        collection_metadata={"hnsw:space": "cosine"},
     )
