@@ -40,14 +40,14 @@ def build_bm25_retriever(vectorstore: Chroma) -> BM25Retriever:
 def build_ensemble_retriever(vectorstore: Chroma) -> EnsembleRetriever:
     chroma_threshold = vectorstore.as_retriever(
         search_type="similarity_score_threshold",
-        search_kwargs={"score_threshold": 0.6, "k": 2},
+        search_kwargs={"score_threshold": 0.5, "k": 2},
     )
 
     bm25 = build_bm25_retriever(vectorstore)
 
     return EnsembleRetriever(
         retrievers=[chroma_threshold, bm25],
-        weights=[0.6, 0.4],
+        weights=[0.5, 0.5],
         search_kwargs={"k": 2},
     )
 
