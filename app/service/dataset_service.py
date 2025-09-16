@@ -5,13 +5,16 @@ from app.core.config import settings
 from app.core.fastapi.transaction import transactional
 from app.models.dataset import DatasetEntity
 from app.crud.dataset_crud import DatasetCRUD
-from app.rag.splitters import load_pdf_from_bytes, split_docs
+from app.service.outbox_service import OutboxService
 
 
 class DatasetService:
-    def __init__(self, s3, crud: DatasetCRUD, vectorstore):
+    def __init__(
+        self, s3, dataset_crud: DatasetCRUD, outbox_service: OutboxService, vectorstore
+    ):
         self.s3 = s3
-        self.crud = crud
+        self.dataset_crud = dataset_crud
+        self.outbox_service = outbox_service
         self.vs = vectorstore
 
     async def generate_pre_signed_url(self, file_name: str):
@@ -52,12 +55,17 @@ class DatasetService:
         }
 
         entity = DatasetEntity(**entity_kwargs)
+        saved = await self.dataset_crud.save(entity)
 
-        # 스플리터
-        docs = load_pdf_from_bytes(self.s3, settings.BUCKET, key)
-        chunks = split_docs(docs=docs, debug=True)
+        # Outbox 이벤트
+        await self.outbox_service.create_outbox(
+            aggregate_type="dataset",
+            aggregate_id=saved.id,
+            event_type="UPLOAD_CONFIRMED",
+            payload={
+                "bucket": saved.bucket,
+                "object_key": saved.object_key,
+            },
+        )
 
-        # 크로마 DB 저장
-        self.vs.add_documents(chunks)
-
-        return await self.crud.save(entity)
+        return saved
