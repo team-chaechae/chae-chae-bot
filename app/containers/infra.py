@@ -1,4 +1,5 @@
 from dependency_injector import containers, providers
+from redis.asyncio import Redis
 from app.core.config import settings
 from app.database.session import AsyncScopedSession
 import boto3
@@ -15,6 +16,17 @@ class InfraContainer(containers.DeclarativeContainer):
 
     # DB 세션
     session = providers.Object(AsyncScopedSession)
+
+    # Redis
+    redis = providers.Singleton(
+        Redis.from_url,
+        url = config.provided.REDIS_URL,
+        decode_responses=True
+    )
+
+    stream_name = providers.Object(settings.REDIS_STREAM_NAME)
+    consumer_group = providers.Object(settings.REDIS_CONSUMER_GROUP)
+    consumer_name = providers.Object(settings.REDIS_CONSUMER_NAME)
 
     # S3
     s3 = providers.Singleton(
