@@ -25,7 +25,7 @@
 <a id="server-run-activate"></a>
 ### 1) 가상환경 활성화
 ```bash
-source .venv-notebook/bin/activate
+source .venv/bin/activate
 ```
 
 <a id="server-run-api"></a>
