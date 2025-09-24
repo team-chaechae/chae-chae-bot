@@ -1,4 +1,6 @@
 from dependency_injector import containers, providers
+from langchain.retrievers.document_compressors import CrossEncoderReranker
+from langchain_community.cross_encoders import HuggingFaceCrossEncoder
 from redis.asyncio import Redis
 from app.core.config import settings
 from app.database.session import AsyncScopedSession
@@ -20,8 +22,8 @@ class InfraContainer(containers.DeclarativeContainer):
     # Redis
     redis = providers.Singleton(
         Redis.from_url,
-        url = config.provided.REDIS_URL,
-        decode_responses=True
+        url=config.provided.REDIS_URL,
+        decode_responses=True,
     )
 
     stream_name = providers.Object(settings.REDIS_STREAM_NAME)
@@ -66,5 +68,16 @@ class InfraContainer(containers.DeclarativeContainer):
     llm = providers.Singleton(
         ChatOllama,
         model="exaone3.5",
-        temperature=0.3,
+        temperature=0.5,
+    )
+
+    encoder = providers.Singleton(
+        HuggingFaceCrossEncoder,
+        model_name="BAAI/bge-reranker-v2-m3",
+    )
+
+    re_ranker = providers.Singleton(
+        CrossEncoderReranker,
+        model=encoder,
+        top_n=3,
     )
