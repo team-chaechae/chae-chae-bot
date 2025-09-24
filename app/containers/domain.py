@@ -42,6 +42,7 @@ class DomainsContainer(containers.DeclarativeContainer):
         build_rag_chain,
         vectorstore=infra.chroma,
         llm=infra.llm,
+        re_ranker=infra.re_ranker
     )
 
     # Reids-Stream
